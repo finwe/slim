@@ -179,13 +179,13 @@ class Uri implements UriInterface
             $port = (int)$env->get('SERVER_PORT', 80);
         }
 
-        if (preg_match('/^(\[[a-fA-F0-9:.]+\])(:\d+)?\z/', $host, $matches)) {
+        if ($host && preg_match('/^(\[[a-fA-F0-9:.]+\])(:\d+)?\z/', $host, $matches)) {
             $host = $matches[1];
 
             if (isset($matches[2])) {
                 $port = (int) substr($matches[2], 1);
             }
-        } else {
+        } elseif ($host) {
             $pos = strpos($host, ':');
             if ($pos !== false) {
                 $port = (int) substr($host, $pos + 1);
@@ -194,7 +194,7 @@ class Uri implements UriInterface
         }
 
         // Path
-        $requestScriptName = (string) parse_url($env->get('SCRIPT_NAME'), PHP_URL_PATH);
+        $requestScriptName = (string) parse_url((string) $env->get('SCRIPT_NAME'), PHP_URL_PATH);
         $requestScriptDir = dirname($requestScriptName);
 
         // parse_url() requires a full URL. As we don't extract the domain name or scheme,
@@ -714,13 +714,13 @@ class Uri implements UriInterface
      */
     protected function filterQuery($query)
     {
-        return preg_replace_callback(
+        return $query ? preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/',
             function ($match) {
                 return rawurlencode($match[0]);
             },
             $query
-        );
+        ) : '';
     }
 
     /**
