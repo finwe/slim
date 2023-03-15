@@ -7,19 +7,18 @@
 
 namespace Slim\Tests\Http;
 
-use PHPUnit_Framework_TestCase;
 use Slim\Http\NonBufferedBody;
 use Slim\Http\Response;
 use Slim\Tests\Assets\HeaderStack;
 
-class NonBufferedBodyTest extends PHPUnit_Framework_TestCase
+class NonBufferedBodyTest extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         HeaderStack::reset();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         HeaderStack::reset();
     }

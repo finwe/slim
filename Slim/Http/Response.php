@@ -178,7 +178,7 @@ class Response extends Message implements ResponseInterface
      * @link http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
      *
      * @param int $code The 3-digit integer result code to set.
-     * @param string $reasonPhrase The reason phrase to use with the
+     * @param mixed $reasonPhrase The reason phrase to use with the
      *     provided status code; if none is provided, implementations MAY
      *     use the defaults as suggested in the HTTP specification.
      *
@@ -190,7 +190,7 @@ class Response extends Message implements ResponseInterface
     {
         $code = $this->filterStatus($code);
 
-        if (!is_string($reasonPhrase) && !method_exists($reasonPhrase, '__toString')) {
+        if (!is_string($reasonPhrase) && (!is_object($reasonPhrase) || !method_exists($reasonPhrase, '__toString'))) {
             throw new InvalidArgumentException('ReasonPhrase must be a string');
         }
 

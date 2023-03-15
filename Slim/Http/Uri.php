@@ -128,25 +128,25 @@ class Uri implements UriInterface
     /**
      * Create new Uri from string.
      *
-     * @param  string $uri Complete Uri string (i.e., https://user:pass@host:443/path?query).
+     * @param mixed $uri Complete Uri string (i.e., https://user:pass@host:443/path?query).
      *
      * @return self
      */
     public static function createFromString($uri)
     {
-        if (!is_string($uri) && !method_exists($uri, '__toString')) {
+        if (!is_string($uri) && (!is_object($uri) || !method_exists($uri, '__toString'))) {
             throw new InvalidArgumentException('Uri must be a string');
         }
 
         $parts = parse_url($uri);
-        $scheme = isset($parts['scheme']) ? $parts['scheme'] : '';
-        $user = isset($parts['user']) ? $parts['user'] : '';
-        $pass = isset($parts['pass']) ? $parts['pass'] : '';
-        $host = isset($parts['host']) ? $parts['host'] : '';
-        $port = isset($parts['port']) ? $parts['port'] : null;
-        $path = isset($parts['path']) ? $parts['path'] : '';
-        $query = isset($parts['query']) ? $parts['query'] : '';
-        $fragment = isset($parts['fragment']) ? $parts['fragment'] : '';
+        $scheme = $parts['scheme'] ?? '';
+        $user = $parts['user'] ?? '';
+        $pass = $parts['pass'] ?? '';
+        $host = $parts['host'] ?? '';
+        $port = $parts['port'] ?? null;
+        $path = $parts['path'] ?? '';
+        $query = $parts['query'] ?? '';
+        $fragment = $parts['fragment'] ?? '';
 
         return new static($scheme, $host, $port, $path, $query, $fragment, $user, $pass);
     }
@@ -280,7 +280,7 @@ class Uri implements UriInterface
     /**
      * Filter Uri scheme.
      *
-     * @param  string $scheme Raw Uri scheme.
+     * @param mixed $scheme Raw Uri scheme.
      * @return string
      *
      * @throws InvalidArgumentException If the Uri scheme is not a string.
@@ -294,11 +294,11 @@ class Uri implements UriInterface
             'http' => true,
         ];
 
-        if (!is_string($scheme) && !method_exists($scheme, '__toString')) {
+        if (!is_string($scheme) && (!is_object($scheme) || !method_exists($scheme, '__toString'))) {
             throw new InvalidArgumentException('Uri scheme must be a string');
         }
 
-        $scheme = str_replace('://', '', strtolower((string)$scheme));
+        $scheme = str_replace('://', '', strtolower((string) $scheme));
         if (!isset($valid[$scheme])) {
             throw new InvalidArgumentException('Uri scheme must be one of: "", "https", "http"');
         }
@@ -686,7 +686,7 @@ class Uri implements UriInterface
      *
      * An empty query string value is equivalent to removing the query string.
      *
-     * @param string $query The query string to use with the new instance.
+     * @param mixed $query The query string to use with the new instance.
      *
      * @return self A new instance with the specified query string.
      *
@@ -694,9 +694,10 @@ class Uri implements UriInterface
      */
     public function withQuery($query)
     {
-        if (!is_string($query) && !method_exists($query, '__toString')) {
+        if (!is_string($query) && (!is_object($query) || !method_exists($query, '__toString'))) {
             throw new InvalidArgumentException('Uri query must be a string');
         }
+
         $query = ltrim((string)$query, '?');
         $clone = clone $this;
         $clone->query = $this->filterQuery($query);
@@ -761,7 +762,7 @@ class Uri implements UriInterface
      */
     public function withFragment($fragment)
     {
-        if (!is_string($fragment) && !method_exists($fragment, '__toString')) {
+        if (!is_string($fragment) && (!is_object($fragment) || !method_exists($fragment, '__toString'))) {
             throw new InvalidArgumentException('Uri fragment must be a string');
         }
         $fragment = ltrim((string)$fragment, '#');

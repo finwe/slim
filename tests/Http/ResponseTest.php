@@ -8,14 +8,13 @@
 namespace Slim\Tests\Http;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
 use ReflectionProperty;
 use RuntimeException;
 use Slim\Http\Body;
 use Slim\Http\Headers;
 use Slim\Http\Response;
 
-class ResponseTest extends PHPUnit_Framework_TestCase
+class ResponseTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstructorWithDefaultArgs()
     {
@@ -33,8 +32,8 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $response = new Response(404, $headers, $body);
 
         $this->assertAttributeEquals(404, 'status', $response);
-        $this->assertAttributeSame($headers, 'headers', $response);
-        $this->assertAttributeSame($body, 'body', $response);
+        $this->assertAttributeEquals($headers, 'headers', $response);
+        $this->assertAttributeEquals($body, 'body', $response);
     }
 
     public function testDeepCopyClone()
@@ -46,8 +45,8 @@ class ResponseTest extends PHPUnit_Framework_TestCase
 
         $this->assertAttributeEquals('1.1', 'protocolVersion', $clone);
         $this->assertAttributeEquals(404, 'status', $clone);
-        $this->assertAttributeNotSame($headers, 'headers', $clone);
-        $this->assertAttributeSame($body, 'body', $clone);
+        $this->assertAttributeNotEquals($headers, 'headers', $clone);
+        $this->assertAttributeEquals($body, 'body', $clone);
     }
 
     public function testDisableSetter()
@@ -76,21 +75,19 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals(302, 'status', $clone);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testWithStatusInvalidStatusCodeThrowsException()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $response = new Response();
         $response->withStatus(800);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage ReasonPhrase must be a string
-     */
     public function testWithStatusInvalidReasonPhraseThrowsException()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('ReasonPhrase must be a string');
+
         $response = new Response();
         $response->withStatus(200, null);
     }
@@ -109,12 +106,11 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('Not Found', $response->getReasonPhrase());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage ReasonPhrase must be supplied for this code
-     */
     public function testMustSetReasonPhraseForUnrecognisedCode()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('ReasonPhrase must be supplied for this code');
+
         $response = new Response();
         $response = $response->withStatus(199);
     }
@@ -319,11 +315,10 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($response->getStatusCode(), 201);
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testWithInvalidJsonThrowsException()
     {
+        $this->expectException(\RuntimeException::class);
+
         $data = ['foo' => 'bar'.chr(233)];
         $this->assertEquals('bar'.chr(233), $data['foo']);
 
@@ -349,5 +344,29 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $response = $response->withStatus(201)->withHeader('Location', '/foo');
 
         $this->assertSame(201, $response->getStatusCode());
+    }
+
+    private function assertAttributeEquals($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertSame($expected, $reflectionProperty->getValue($class));
+    }
+
+    private function assertAttributeNotEquals($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertNotSame($expected, $reflectionProperty->getValue($class));
+    }
+
+    private function assertAttributeInstanceOf($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertInstanceOf($expected, $reflectionProperty->getValue($class));
     }
 }

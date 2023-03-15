@@ -8,13 +8,11 @@
 namespace Slim\Tests\Http;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_MockObject_MockObject;
-use PHPUnit_Framework_TestCase;
 use Slim\Http\Body;
 use Slim\Http\Headers;
 use Slim\Tests\Mocks\MessageStub;
 
-class MessageTest extends PHPUnit_Framework_TestCase
+class MessageTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetProtocolVersion()
     {
@@ -32,11 +30,10 @@ class MessageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('1.0', $clone->protocolVersion);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testWithProtocolVersionInvalidThrowsException()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $message = new MessageStub();
         $message->withProtocolVersion('3.0');
     }

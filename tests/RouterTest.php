@@ -8,13 +8,12 @@
 namespace Slim\Tests;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
 use ReflectionClass;
 use RuntimeException;
 use Slim\Http\Uri;
 use Slim\Router;
 
-class RouterTest extends PHPUnit_Framework_TestCase
+class RouterTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Router
@@ -26,12 +25,12 @@ class RouterTest extends PHPUnit_Framework_TestCase
      */
     protected $cacheFile;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->router = new Router;
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         if (file_exists($this->cacheFile)) {
             unlink($this->cacheFile);
@@ -67,12 +66,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals('/prefix/hello/{first}/{last}', 'pattern', $route);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Route pattern must be a string
-     */
     public function testMapWithInvalidPatternType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Route pattern must be a string');
+
         $methods = ['GET'];
         $pattern = ['foo'];
         $callable = function ($request, $response, $args) {
@@ -196,11 +194,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testPathForWithMissingSegmentData()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $methods = ['GET'];
         $pattern = '/hello/{first}/{last}';
         $callable = function ($request, $response, $args) {
@@ -212,11 +209,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->pathFor('foo', ['last' => 'lockhart']);
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testPathForRouteNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+
         $methods = ['GET'];
         $pattern = '/hello/{first}/{last}';
         $callable = function ($request, $response, $args) {
@@ -228,11 +224,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->pathFor('bar', ['first' => 'josh', 'last' => 'lockhart']);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testSettingInvalidBasePath()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $this->router->setBasePath(['invalid']);
     }
 
@@ -256,11 +251,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\FastRoute\Dispatcher', $prop->getValue($this->router));
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testRemoveRoute()
     {
+        $this->expectException(\RuntimeException::class);
+
         $methods = ['GET'];
         $callable = function ($request, $response, $args) {
             echo sprintf('Hello ignore me');
@@ -312,11 +306,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->getNamedRoute($routeToRemove->getName());
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testRouteRemovalNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+
         $this->router->setBasePath('/base/path');
         $this->router->removeNamedRoute('non-existing-route-name');
     }
@@ -354,7 +347,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testSettingInvalidCacheFileValue()
     {
-        $this->setExpectedException(
+        $this->expectException(
             '\InvalidArgumentException',
             'Router cache file must be a string'
         );
@@ -366,7 +359,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->cacheFile = __DIR__ . '/non-readable.cache';
         file_put_contents($this->cacheFile, '<?php return []; ?>');
 
-        $this->setExpectedException(
+        $this->expectException(
             '\RuntimeException',
             sprintf('Router cache file `%s` is not readable', $this->cacheFile)
         );
@@ -378,7 +371,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $cacheFile = __DIR__ . '/non-writable-directory/router.cache';
 
-        $this->setExpectedException(
+        $this->expectException(
             '\RuntimeException',
             sprintf('Router cache file directory `%s` is not writable', dirname($cacheFile))
         );
@@ -436,11 +429,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertSame($dispatcher2, $dispatcher);
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testLookupRouteThrowsExceptionIfRouteNotFound()
     {
+        $this->expectException(\RuntimeException::class);
+
         $this->router->lookupRoute("thisIsMissing");
     }
 
@@ -461,4 +453,21 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    private function assertAttributeEquals($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertSame($expected, $reflectionProperty->getValue($class));
+    }
+
+    private function assertAttributeContains($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertContains($expected, $reflectionProperty->getValue($class));
+    }
+
 }

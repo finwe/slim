@@ -8,11 +8,10 @@
 namespace Slim\Tests\Http;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
 use Slim\Http\Environment;
 use Slim\Http\Uri;
 
-class UriTest extends PHPUnit_Framework_TestCase
+class UriTest extends \PHPUnit\Framework\TestCase
 {
     protected $uri;
 
@@ -56,21 +55,19 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals('', 'scheme', $uri);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri scheme must be one of: "", "https", "http"
-     */
     public function testWithSchemeInvalid()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri scheme must be one of: "", "https", "http"');
+
         $this->uriFactory()->withScheme('ftp');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri scheme must be a string
-     */
     public function testWithSchemeInvalidType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri scheme must be a string');
+
         $this->uriFactory()->withScheme([]);
     }
 
@@ -266,19 +263,17 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals(null, 'port', $uri);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testWithPortInvalidInt()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $this->uriFactory()->withPort(70000);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testWithPortInvalidString()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $this->uriFactory()->withPort('Foo');
     }
 
@@ -294,12 +289,11 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals('/base', 'basePath', $uri);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri path must be a string
-     */
     public function testWithBasePathInvalidType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri path must be a string');
+
         $this->uriFactory()->withBasePath(['foo']);
     }
 
@@ -357,12 +351,11 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals('/include%25s/new', 'path', $uri);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri path must be a string
-     */
     public function testWithPathInvalidType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri path must be a string');
+
         $this->uriFactory()->withPath(['foo']);
     }
 
@@ -399,12 +392,11 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals('foobar=%25match', 'query', $uri);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri query must be a string
-     */
     public function testWithQueryInvalidType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri query must be a string');
+
         $this->uriFactory()->withQuery(['foo']);
     }
 
@@ -434,12 +426,11 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeEquals('', 'fragment', $uri);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri fragment must be a string
-     */
     public function testWithFragmentInvalidType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri fragment must be a string');
+
         $this->uriFactory()->withFragment(['foo']);
     }
 
@@ -480,12 +471,11 @@ class UriTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('abc=123', $uri->getQuery());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Uri must be a string
-     */
     public function testCreateFromStringWithInvalidType()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Uri must be a string');
+
         Uri::createFromString(['https://example.com:8080/foo/bar?abc=123']);
     }
 
@@ -719,5 +709,13 @@ class UriTest extends PHPUnit_Framework_TestCase
     {
         $uri = new Uri('https', 'example.com', null, '0');
         $this->assertSame('0', (string) $uri->getPath());
+    }
+
+    private function assertAttributeEquals($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertSame($expected, $reflectionProperty->getValue($class));
     }
 }

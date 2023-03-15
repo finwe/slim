@@ -10,7 +10,6 @@ namespace Slim\Tests;
 use BadMethodCallException;
 use Error;
 use Exception;
-use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -44,32 +43,32 @@ function header($value, $replace = true)
     \Slim\header($value, $replace);
 }
 
-class AppTest extends PHPUnit_Framework_TestCase
+class AppTest extends \PHPUnit\Framework\TestCase
 {
-    public function setUp()
+    protected function setUp(): void
     {
         HeaderStack::reset();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         HeaderStack::reset();
     }
 
-    public static function setupBeforeClass()
+    public static function setupBeforeClass(): void
     {
         // ini_set('log_errors', 0);
         ini_set('error_log', tempnam(sys_get_temp_dir(), 'slim'));
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         // ini_set('log_errors', 1);
     }
 
     public function testContainerInterfaceException()
     {
-        $this->setExpectedException('InvalidArgumentException', 'Expected a ContainerInterface');
+        $this->expectException('InvalidArgumentException', 'Expected a ContainerInterface');
         $app = new App('');
     }
 
@@ -1033,14 +1032,14 @@ class AppTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $resOut);
         $this->assertEquals(405, (string)$resOut->getStatusCode());
         $this->assertEquals(['GET'], $resOut->getHeader('Allow'));
-        $this->assertContains(
+        $this->assertStringContainsString(
             '<p>Method not allowed. Must be one of: <strong>GET</strong></p>',
-            (string)$resOut->getBody()
+            (string) $resOut->getBody()
         );
 
         // now test that exception is raised if the handler isn't registered
         unset($app->getContainer()['notAllowedHandler']);
-        $this->setExpectedException('Slim\Exception\MethodNotAllowedException');
+        $this->expectException('Slim\Exception\MethodNotAllowedException');
         $app($req, $res);
     }
 
@@ -1250,7 +1249,7 @@ class AppTest extends PHPUnit_Framework_TestCase
 
         // now test that exception is raised if the handler isn't registered
         unset($app->getContainer()['notFoundHandler']);
-        $this->setExpectedException('Slim\Exception\NotFoundException');
+        $this->expectException('Slim\Exception\NotFoundException');
         $app($req, $res);
     }
 
@@ -1317,7 +1316,7 @@ class AppTest extends PHPUnit_Framework_TestCase
 
         $app->get('/foo', 'foo:bar');
 
-        $this->setExpectedException('\RuntimeException');
+        $this->expectException('\RuntimeException');
 
         // Invoke app
         $app($req, $res);
@@ -1891,7 +1890,7 @@ class AppTest extends PHPUnit_Framework_TestCase
         $resOut = $app->run(true);
 
         $this->assertEquals(500, $resOut->getStatusCode());
-        $this->assertNotRegExp('/.*middleware exception.*/', (string)$resOut);
+        $this->assertDoesNotMatchRegularExpression('/.*middleware exception.*/', (string)$resOut);
     }
 
     /**
@@ -1930,7 +1929,7 @@ class AppTest extends PHPUnit_Framework_TestCase
         $resOut = $app->run(true);
 
         $this->assertEquals(500, $resOut->getStatusCode());
-        $this->assertNotRegExp('/.*middleware exception.*/', (string)$resOut);
+        $this->assertDoesNotMatchRegularExpression('/.*middleware exception.*/', (string)$resOut);
     }
 
     /**
@@ -1959,11 +1958,10 @@ class AppTest extends PHPUnit_Framework_TestCase
         return $app;
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testRunExceptionNoHandler()
     {
+        $this->expectException(\Exception::class);
+
         $app = $this->appFactory();
 
         $container = $app->getContainer();
@@ -2031,11 +2029,10 @@ class AppTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(404, $res->getStatusCode());
     }
 
-    /**
-     * @expectedException \Slim\Exception\NotFoundException
-     */
     public function testRunNotFoundWithoutHandler()
     {
+        $this->expectException(\Slim\Exception\NotFoundException::class);
+
         $app = $this->appFactory();
         $container = $app->getContainer();
         unset($container['notFoundHandler']);
@@ -2064,11 +2061,10 @@ class AppTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(405, $res->getStatusCode());
     }
 
-    /**
-     * @expectedException \Slim\Exception\MethodNotAllowedException
-     */
     public function testRunNotAllowedWithoutHandler()
     {
+        $this->expectException(\Slim\Exception\MethodNotAllowedException::class);
+
         $app = $this->appFactory();
         $container = $app->getContainer();
         unset($container['notAllowedHandler']);
@@ -2134,7 +2130,7 @@ class AppTest extends PHPUnit_Framework_TestCase
         $resOut = $app->run(true);
 
         $this->assertEquals(500, $resOut->getStatusCode());
-        $this->assertRegExp('/.*middleware exception.*/', (string)$resOut);
+        $this->assertMatchesRegularExpression('/.*middleware exception.*/', (string)$resOut);
     }
 
     public function testFinalize()
@@ -2186,11 +2182,10 @@ class AppTest extends PHPUnit_Framework_TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     */
     public function testCallingFromContainerNotCallable()
     {
+        $this->expectException(\BadMethodCallException::class);
+
         $settings = [
             'foo' => function ($c) {
                 return null;
@@ -2200,20 +2195,18 @@ class AppTest extends PHPUnit_Framework_TestCase
         $app->foo('bar');
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     */
     public function testCallingAnUnknownContainerCallableThrows()
     {
+        $this->expectException(\BadMethodCallException::class);
+
         $app = new App();
         $app->foo('bar');
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     */
     public function testCallingAnUncallableContainerKeyThrows()
     {
+        $this->expectException(\BadMethodCallException::class);
+
         $app = new App();
         $app->getContainer()['bar'] = 'foo';
         $app->foo('bar');
@@ -2235,12 +2228,11 @@ class AppTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($response->hasHeader('Content-Length'));
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Unexpected data in output buffer
-     */
     public function testForUnexpectedDataInOutputBuffer()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unexpected data in output buffer');
+
         $this->expectOutputString('test'); // needed to avoid risky test warning
         echo "test";
         $method = new ReflectionMethod('Slim\App', 'finalize');
@@ -2370,26 +2362,6 @@ class AppTest extends PHPUnit_Framework_TestCase
 
         $result = $method->invoke(new App(), $request);
         $this->assertTrue($result);
-    }
-
-    public function testHandlePhpError()
-    {
-        $this->skipIfPhp70();
-        $method = new ReflectionMethod('Slim\App', 'handlePhpError');
-        $method->setAccessible(true);
-
-        $throwable = $this->getMock(
-            '\Throwable',
-            ['getCode', 'getMessage', 'getFile', 'getLine', 'getTraceAsString', 'getPrevious']
-        );
-        $req = $this->getMockBuilder('Slim\Http\Request')->disableOriginalConstructor()->getMock();
-        $res = new Response();
-
-        $res = $method->invoke(new App(), $throwable, $req, $res);
-
-        $this->assertSame(500, $res->getStatusCode());
-        $this->assertSame('text/html', $res->getHeaderLine('Content-Type'));
-        $this->assertEquals(0, strpos((string)$res->getBody(), '<html>'));
     }
 
     public function testExceptionOutputBufferingOff()
@@ -2605,10 +2577,20 @@ end;
         $this->assertEquals('3', (string)$resOut2->getBody());
     }
 
-    protected function skipIfPhp70()
+    private function assertAttributeEquals($expected, $attribute, $class)
     {
-        if (version_compare(PHP_VERSION, '7.0', '>=')) {
-            $this->markTestSkipped();
-        }
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertSame($expected, $reflectionProperty->getValue($class));
     }
+
+    private function assertAttributeContains($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertContains($expected, $reflectionProperty->getValue($class));
+    }
+
 }

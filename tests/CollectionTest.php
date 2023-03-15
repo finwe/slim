@@ -7,11 +7,10 @@
 
 namespace Slim\Tests;
 
-use PHPUnit_Framework_TestCase;
 use ReflectionProperty;
 use Slim\Collection;
 
-class CollectionTest extends PHPUnit_Framework_TestCase
+class CollectionTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Collection
@@ -23,7 +22,7 @@ class CollectionTest extends PHPUnit_Framework_TestCase
      */
     protected $property;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->bag = new Collection();
         $this->property = new ReflectionProperty($this->bag, 'data');

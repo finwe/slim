@@ -8,7 +8,6 @@
 namespace Slim\Tests;
 
 use Exception;
-use PHPUnit_Framework_TestCase;
 use Slim\Container;
 use Slim\DeferredCallable;
 use Slim\Http\Body;
@@ -22,7 +21,7 @@ use Slim\Tests\Mocks\CallableTest;
 use Slim\Tests\Mocks\InvocationStrategyTest;
 use Slim\Tests\Mocks\MiddlewareStub;
 
-class RouteTest extends PHPUnit_Framework_TestCase
+class RouteTest extends \PHPUnit\Framework\TestCase
 {
     public function routeFactory()
     {
@@ -72,7 +71,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
     {
         $callable = $this->routeFactory()->getCallable();
 
-        $this->assertInternalType('callable', $callable);
+        $this->assertIsCallable($callable);
     }
 
     public function testArgumentSetting()
@@ -176,7 +175,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
     {
         $route = $this->routeFactory();
 
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
 
         $route->setName(false);
     }
@@ -201,7 +200,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
     {
         $route = $this->routeFactory();
 
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
 
         $route->setOutputBuffering('invalid');
     }
@@ -298,11 +297,10 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('foo', (string)$response->getBody());
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testInvokeWithException()
     {
+        $this->expectException(\Exception::class);
+
         $callable = function ($req, $res, $args) {
             throw new Exception();
         };
@@ -397,4 +395,13 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Slim\Http\Response', $result);
         $this->assertEquals([$container['CallableTest2'], 'toCall'], InvocationStrategyTest::$LastCalledFor);
     }
+
+    private function assertAttributeEquals($expected, $attribute, $class)
+    {
+        $reflectionProperty = new \ReflectionProperty($class, $attribute);
+        $reflectionProperty->setAccessible(true);
+
+        $this->assertSame($expected, $reflectionProperty->getValue($class));
+    }
+
 }
