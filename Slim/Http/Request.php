@@ -1027,14 +1027,17 @@ class Request extends Message implements ServerRequestInterface
         }
 
         if (isset($this->bodyParsers[$mediaType])) {
+
             $body = (string)$this->getBody();
             $parsed = $this->bodyParsers[$mediaType]($body);
+            $parsed = '' === $parsed ? null : $parsed;
 
-            if (!is_null($parsed) && !is_object($parsed) && !is_array($parsed)) {
+            if (null !== $parsed && !is_object($parsed) && !is_array($parsed)) {
                 throw new RuntimeException(
                     'Request body media type parser return value must be an array, an object, or null'
                 );
             }
+
             $this->bodyParsed = $parsed;
             return $this->bodyParsed;
         }
