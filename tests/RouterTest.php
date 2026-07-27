@@ -469,5 +469,4 @@ class RouterTest extends \PHPUnit\Framework\TestCase
 
         $this->assertContains($expected, $reflectionProperty->getValue($class));
     }
-
 }

@@ -1027,7 +1027,6 @@ class Request extends Message implements ServerRequestInterface
         }
 
         if (isset($this->bodyParsers[$mediaType])) {
-
             $body = (string)$this->getBody();
             $parsed = $this->bodyParsers[$mediaType]($body);
             $parsed = '' === $parsed ? null : $parsed;
@@ -1195,7 +1194,7 @@ class Request extends Message implements ServerRequestInterface
      *
      * @return mixed[]
      */
-    public function getParams(array $only = null)
+    public function getParams(?array $only = null)
     {
         $params = $this->getQueryParams();
         $postParams = $this->getParsedBody();
